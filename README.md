@@ -2,8 +2,9 @@
 
 > Aplikasi analisis statistik berbasis web — untuk riset akademik, data lab eksperimen, dan analisis keuangan pribadi. Tidak perlu install, tidak perlu internet, buka langsung di browser.
 
-![StatLab Preview](preview.png)
+![StatLab Preview](preview.svg)
 
+https://xian0000000.github.io/statistic/ <-- web preview
 ---
 
 ## Fitur
