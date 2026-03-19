@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>StatLab v2.0 — Analisis Statistik</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<div class="hdr">
+  <div>
+    <span class="logo">Stat<span class="logo-accent">Lab</span></span>
+    <span class="logo-sub">Statistik Riset, Lab &amp; Keuangan</span>
+  </div>
+  <div class="hdr-btns">
+    <span class="version-badge">v2.0</span>
+    <button class="btn btn-r btn-sm" onclick="SL.App.resetAll()">Reset</button>
+    <button class="btn btn-t btn-sm" onclick="SL.App.quickAnalyze()">Analisis &#8594;</button>
+  </div>
+</div>
+
+<div class="tabbar" id="mainTabs">
+  <button class="tab on" data-tab="input"    onclick="SL.UI.goTab('input',this)">&#9312; Input</button>
+  <button class="tab"    data-tab="overview" onclick="SL.UI.goTab('overview',this)">&#9313; Overview</button>
+  <button class="tab"    data-tab="desc"     onclick="SL.UI.goTab('desc',this)">&#9314; Deskriptif</button>
+  <button class="tab"    data-tab="trend"    onclick="SL.UI.goTab('trend',this)">&#9315; Tren</button>
+  <button class="tab"    data-tab="norm"     onclick="SL.UI.goTab('norm',this)">&#9316; Normalitas</button>
+  <button class="tab"    data-tab="corr"     onclick="SL.UI.goTab('corr',this)">&#9317; Korelasi</button>
+  <button class="tab"    data-tab="reg"      onclick="SL.UI.goTab('reg',this)">&#9318; Regresi</button>
+  <button class="tab"    data-tab="anova"    onclick="SL.UI.goTab('anova',this)">&#9319; ANOVA</button>
+  <button class="tab"    data-tab="plot"     onclick="SL.UI.goTab('plot',this)">&#9320; Plot Matrix</button>
+  <button class="tab"    data-tab="export"   onclick="SL.UI.goTab('export',this)">&#9321; Ekspor</button>
+</div>
+
+<div class="main">
+
+  <!-- ① INPUT -->
+  <div id="p-input" class="panel on">
+    <div class="card">
+      <div class="card-title">Masukkan Data</div>
+      <div class="card-sub">Upload CSV multi-kolom atau gunakan data contoh di bawah.</div>
+      <div class="g2">
+        <div>
+          <div class="slbl">Upload CSV</div>
+          <div class="upload-box" id="dropzone" onclick="document.getElementById('csvFile').click()">
+            <div class="upload-icon">&#128202;</div>
+            <div class="upload-title">Klik atau drag &amp; drop file CSV</div>
+            <div class="upload-sub">Baris pertama = nama kolom &mdash; semua kolom numerik terdeteksi otomatis</div>
+          </div>
+          <input type="file" id="csvFile" accept=".csv" style="display:none" onchange="SL.App.loadCSV(this)">
+        </div>
+        <div>
+          <div class="slbl">Data Contoh</div>
+          <div style="display:flex;flex-direction:column;gap:10px;">
+            <div style="background:var(--paper);border-radius:var(--radius);padding:14px;border:1px solid var(--border);">
+              <div style="font-weight:600;margin-bottom:4px;">&#128200; Data Keuangan</div>
+              <div style="font-size:12px;color:var(--ink3);margin-bottom:10px;">Pengeluaran bulanan 1 tahun: Makan, Transport, Hiburan, Belanja, Tagihan, Tabungan</div>
+              <button class="btn btn-t btn-sm" onclick="SL.App.loadSampleFinance()">Muat Data Keuangan</button>
+            </div>
+            <div style="background:var(--paper);border-radius:var(--radius);padding:14px;border:1px solid var(--border);">
+              <div style="font-weight:600;margin-bottom:4px;">&#128300; Data Lab / Eksperimen</div>
+              <div style="font-size:12px;color:var(--ink3);margin-bottom:10px;">30 run eksperimen: Suhu, Tekanan, Waktu, Yield</div>
+              <button class="btn btn-w btn-sm" onclick="SL.App.loadSampleLab()">Muat Data Lab</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="previewSection" style="display:none">
+      <div class="card">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+          <div>
+            <div class="card-title">Preview Data</div>
+            <div class="card-sub" id="previewSrc"></div>
+          </div>
+          <div id="previewBadge" class="badge badge-green"></div>
+        </div>
+        <div id="dataPreview"></div>
+        <div style="display:flex;gap:8px;margin-top:14px;flex-wrap:wrap;">
+          <button class="btn btn-t" onclick="SL.UI.goTab('overview', document.querySelector('.tab[data-tab=overview]'))">Lihat Overview &#8594;</button>
+          <button class="btn btn-w btn-sm" id="addTotalBtn" onclick="SL.App.addTotal()" style="display:none">&#43; Kolom Total</button>
+          <button class="btn btn-w btn-sm" id="removeTotalBtn" onclick="SL.App.removeTotal()" style="display:none">&#8722; Hapus Total</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ② OVERVIEW -->
+  <div id="p-overview" class="panel">
+    <div id="overviewContent"></div>
+  </div>
+
+  <!-- ③ DESCRIPTIVE -->
+  <div id="p-desc" class="panel">
+    <div id="descContent"></div>
+  </div>
+
+  <!-- ④ TREND -->
+  <div id="p-trend" class="panel">
+    <div id="trendContent"></div>
+  </div>
+
+  <!-- ⑤ NORMALITY -->
+  <div id="p-norm" class="panel">
+    <div id="normContent"></div>
+  </div>
+
+  <!-- ⑥ CORRELATION -->
+  <div id="p-corr" class="panel">
+    <div class="card" style="margin-bottom:12px">
+      <div class="slbl">Metode Korelasi</div>
+      <select id="corrType" style="max-width:320px" onchange="SL.Panels.corr()">
+        <option value="pearson">Pearson &mdash; untuk data normal / kontinu</option>
+        <option value="spearman">Spearman &mdash; untuk data ordinal / non-normal</option>
+      </select>
+    </div>
+    <div id="corrContent"></div>
+  </div>
+
+  <!-- ⑦ REGRESSION -->
+  <div id="p-reg" class="panel">
+    <div id="regContent"></div>
+  </div>
+
+  <!-- ⑧ ANOVA -->
+  <div id="p-anova" class="panel">
+    <div id="anovaContent"></div>
+  </div>
+
+  <!-- ⑨ PLOT MATRIX -->
+  <div id="p-plot" class="panel">
+    <div id="plotContent"></div>
+  </div>
+
+  <!-- ⑩ EXPORT -->
+  <div id="p-export" class="panel">
+    <div class="card">
+      <div class="card-title">Ekspor Hasil Analisis</div>
+      <div class="card-sub">Simpan data dan hasil dalam berbagai format.</div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;">
+        <button class="btn btn-t" onclick="SL.App.expCSV()">&#128196; Data CSV</button>
+        <button class="btn btn-w" onclick="SL.App.expJSON()">&#128194; Statistik JSON</button>
+        <button class="btn btn-b" onclick="SL.App.expHTML()">&#128203; Laporan HTML</button>
+      </div>
+    </div>
+    <div class="card">
+      <div class="slbl">Ringkasan Laporan Teks</div>
+      <pre id="expPre" style="font-size:12px;line-height:1.9;color:#444;background:var(--paper);padding:16px;border-radius:var(--radius);overflow-x:auto;white-space:pre-wrap;max-height:500px;overflow-y:auto;font-family:var(--mono)"></pre>
+    </div>
+  </div>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script src="js/math.js"></script>
+<script src="js/ui.js"></script>
+<script src="js/charts.js"></script>
+<script src="js/data.js"></script>
+<script src="js/analysis.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
